@@ -142,3 +142,23 @@ def register_attendance(data: AttendanceModel, db: Session = Depends(get_db)):
         "latitude": data.latitude,
         "longitude": data.longitude
     }
+
+
+@app.get("/attendance/{user_id}")
+def get_attendance_history(user_id: int, db: Session = Depends(get_db)):
+    records = (
+        db.query(Attendance)
+        .filter(Attendance.user_id == user_id)
+        .order_by(Attendance.id.desc())
+        .all()
+    )
+    return [
+        {
+            "id": record.id,
+            "address": record.address,
+            "latitude": record.latitude,
+            "longitude": record.longitude,
+            "created_at": str(record.created_at) if hasattr(record, "created_at") else None,
+        }
+        for record in records
+    ]
